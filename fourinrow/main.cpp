@@ -2,7 +2,6 @@
 #include <cstdlib>
 
 #include "fourinrow.hpp"
-#include "test.hpp"
 
 int CPU_move_ab(FourInRow game, int depth) {
     return game.ab_move(depth);
@@ -29,7 +28,8 @@ void human_vs_CPU() {
             game.move(i);
         }
         else {
-            game.move(CPU_move_ab(game));
+            game.move(CPU_move_mc(game, 2000));
+            // game.move(CPU_move_ab(game));
         }
         game.display();
         std::cout << std::endl;
