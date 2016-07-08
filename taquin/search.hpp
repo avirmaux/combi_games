@@ -12,6 +12,13 @@ struct node {
     Taquin<size_board> *father;
     int eval;
 
+    std::vector<node<size_board>> childs(node<size_board> taq) {
+        std::vector<node<size_board>> res;
+        for (x : taq.vector_of_valid_moves())
+            res.append({x, &taq, x.distance()});
+        return res;
+    }
+
     friend bool operator<(node x, node y) {
         return (x.eval < y.eval);
     }
@@ -28,7 +35,6 @@ class TaquinSearchTree {
         init_state = {taq, nullptr, taq.distance()};
     }
 
-    // std::vector<int> childs
 
     int a_star_search() {
 

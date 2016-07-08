@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 
-// #include "search.hpp"
+#include "search.hpp"
 #include "taquin.hpp"
 
 void visual_tests() {
@@ -38,7 +38,7 @@ void visual_tests() {
     std::cout << std::endl;
     std::cout << taq.distance() << std::endl;
 
-    // TaquinSearchTree<5> astar_qt (qat);
+    TaquinSearchTree<5> astar_qt (qat);
 }
 
 int main() {

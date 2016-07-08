@@ -155,8 +155,8 @@ class Taquin {
     // Return the number of misplaced tiles
     int distance() {
         int cpt = 0;
-        for (int i = 0; i < size_board * size_board;)
-            cpt += (board[i] == ++i);
+        for (int i = 0; i < size_board * size_board; i++)
+            cpt += (board[i] == i+1);
         return cpt;
     }
 

@@ -4,7 +4,7 @@ CXXLIBS=-fcilkplus
 CXXDEF=
 LDFLAGS=
 
-all:  main.o search.o
+all:  main.o
 	$(CXX) $^ $(CXXLIBS) $(LDFLAGS)
 
 %.o : %.cpp
