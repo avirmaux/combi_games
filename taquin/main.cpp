@@ -5,8 +5,8 @@
 #include "taquin.hpp"
 
 void visual_tests() {
-    Taquin<3> taq;
-    Taquin<5> qat;
+    Taquin::Board<3> taq;
+    Taquin::Board<5> qat;
 
     taq.display();
     taq.move(BOTTOM);
@@ -38,11 +38,18 @@ void visual_tests() {
     std::cout << std::endl;
     std::cout << taq.distance() << std::endl;
 
-    TaquinSearchTree<5> astar_qt (qat);
+    Taquin::SearchTree<5> astar_qt (qat);
+    astar_qt.init_state.display();
+    // Taquin::childs(astar_qt.init_state);
 }
 
 int main() {
     srand(time(NULL));
-    visual_tests();
+    // visual_tests();
+    Taquin::Board<3> taq;
+
+    taq.shuffle(7);
+    Taquin::SearchTree<3> searchTaq (taq);
+    std::cout << searchTaq.a_star_search() << std::endl;
     return 0;
 }

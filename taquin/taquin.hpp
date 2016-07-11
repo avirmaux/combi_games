@@ -9,17 +9,36 @@
 
 enum Direction {UP, RIGHT, BOTTOM, LEFT};
 
+namespace Taquin
+{
+
 template <int size_board>
-class Taquin {
+class Board {
     public:
 
-    int empty_cell;
     int board[size_board * size_board];
+    int empty_cell;
 
-    Taquin() : empty_cell (size_board * size_board - 1) {
+    Board() : empty_cell (size_board * size_board - 1) {
         for (int i = 0; i < size_board * size_board - 1; i++)
             board[i] = i+1;
         board[size_board * size_board - 1] = 0;
+    }
+
+    friend bool operator==(const Board<size_board>& lhs, const Board<size_board>& rhs) {
+        for (int i = 0; i < size_board * size_board; i++)
+            if (lhs.board[i] != rhs.board[i]) return false;
+        return true;
+    }
+
+    friend bool operator!=(const Board<size_board>& lhs, const Board<size_board>& rhs) {
+        return !(lhs == rhs);
+    }
+
+    friend bool operator<(const Board<size_board>& lhs, const Board<size_board>& rhs) {
+        for (int i = 0; i < size_board * size_board; i++)
+            if (lhs.board[i] > rhs.board[i]) return false;
+        return true;
     }
 
     int pos(int i, int j) {
@@ -144,6 +163,17 @@ class Taquin {
         return res;
     }
 
+    std::vector<Board<size_board>> successors () {
+        std::vector<Board<size_board>> res;
+        Board<size_board> b;
+        for (auto d : vector_of_valid_moves()) {
+            b = *this;
+            b.move(d);
+            res.push_back(b);
+        }
+        return res;
+    }
+
     void shuffle(int nbr) {
         std::vector<Direction> v;
         for (int i = 0; i < nbr; i++) {
@@ -161,9 +191,10 @@ class Taquin {
     }
 
     bool is_solved() {
-        return distance() == size_board * size_board - 1;
+        return (distance() == size_board * size_board - 1);
     }
 
 };
 
+} // end of namespace
 #endif
