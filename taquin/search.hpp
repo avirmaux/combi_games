@@ -12,7 +12,7 @@ namespace Taquin
 {
 
 template <int size_board>
-class Node {
+struct Node {
 
     public:
 
@@ -22,10 +22,6 @@ class Node {
 
     friend bool operator<(const Node& x, const Node& y) {
         return (x.cost + x.heuristic > y.cost + y.heuristic);
-    }
-
-    void display() const {
-        board.display();
     }
 };
 
