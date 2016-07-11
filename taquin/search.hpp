@@ -2,6 +2,7 @@
 #define _A_STAR_H
 
 #include <vector>
+#include <map>
 #include <set>
 #include <queue>
 
@@ -11,37 +12,28 @@ namespace Taquin
 {
 
 template <int size_board>
-class node {
+class Node {
 
     public:
 
     Board<size_board> board;
-    node *father;
     int cost;
     int heuristic;
 
-    friend bool operator<(const node& x, const node& y) {
-        return (x.cost < y.cost);
+    friend bool operator<(const Node& x, const Node& y) {
+        return (x.cost + x.heuristic > y.cost + y.heuristic);
     }
 
-    void display() {
-        node<size_board> path = *this;
-        while (path.father != NULL) {
-            path.board.display();
-            path = *path.father;
-            std::cout << " ||| " << std::endl;
-        }
-        // this->board.display();
-        // std::cout << " ||| " << std::endl;
+    void display() const {
+        board.display();
     }
 };
 
 template <int size_board>
-std::vector<node<size_board>> childs(node<size_board> taq) {
-    std::vector<node<size_board>> res;
-    for (auto x : taq.board.successors()) {
-            std::cout << "..." << std::endl;
-            res.push_back({x, &taq, 0, x.distance()});
+std::vector<Node<size_board>> childs(Node<size_board> &taq) {
+    std::vector<Node<size_board>> res;
+    for (const auto &x : taq.board.successors()) {
+        res.push_back({x, taq.cost + 1, x.distance()});
     }
     return res;
 }
@@ -51,58 +43,61 @@ class SearchTree {
 
     public:
 
-    node<size_board> init_state;
+    Node<size_board> init_state;
 
     SearchTree(Board<size_board> taq) {
-        init_state = {taq, nullptr, 0, taq.distance()};
+        init_state = {taq, 0, taq.distance()};
     }
 
-
-    int a_star_search() {
+    std::vector<Board<size_board>> a_star_search() {
         int cpt = 0;
-        node<size_board> current_node;
-        std::priority_queue<node<size_board>> heap;
+        Node<size_board> current_node;
+        std::priority_queue<Node<size_board>> heap;
         std::set<Board<size_board>> visited;
+        std::map<Board<size_board>, Board<size_board>> parent_node;
+
+        std::vector<Board<size_board>> shortest_path;
+        Board<size_board> parc;
+
         heap.push(init_state);
-        init_state.display();
 
         do {
-            if (heap.empty()) {
-                std::cout << "Empty heap, this should not happen" << std::endl;
-                break;
-            }
-            std::cout << "Size: " << heap.size() << std::endl;
-            std::cout << "Size of set: " << visited.size() << std::endl;
-            cpt++;
             current_node = heap.top();
             heap.pop();
-            std::cout << " POP " << std::endl;
-            current_node.board.display();
             if (visited.find(current_node.board) != visited.end()) {
-                std::cout << "Already visited" << std::endl;
-                visited.find(current_node.board)->display();
                 continue;
             }
-            std::cout << "Let's visit the children" << std::endl;
             visited.insert(current_node.board);
 
-            current_node.display();
-            std::cout << " --- PUSHS ---" << std::endl;
-            for (auto &c : childs(current_node)) {
-                // std::cout<< " , " << std::endl;
-                c.cost = current_node.cost + 1;
-                heap.push(c);
+            for (auto c : childs(current_node)) {
+                if (visited.find(c.board) == visited.end()) {
+                    parent_node[c.board] = current_node.board;
+                    heap.push(c);
+                }
             }
-        } while (!(heap.top().heuristic == 0));
-        // heap.top().display();
-        return cpt;
+        } while (!(heap.top().board.is_solved()));
 
-        return 0;
+
+        parc = heap.top().board;
+        shortest_path.push_back(parc);
+        while (parc != init_state.board) {
+            parc = parent_node[parc];
+            shortest_path.push_back(parc);
+            cpt++;
+        }
+        return shortest_path;
     }
 
 
 };
 
+template <int size_board>
+void print_solution(std::vector<Board<size_board>> v) {
+    for (int i = v.size()-1; i >= 0; i--) {
+        v[i].display();
+        std::cout << std::endl;
+    }
+}
 } // end of namespace
 
 #endif

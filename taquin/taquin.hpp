@@ -36,16 +36,16 @@ class Board {
     }
 
     friend bool operator<(const Board<size_board>& lhs, const Board<size_board>& rhs) {
-        for (int i = 0; i < size_board * size_board; i++)
-            if (lhs.board[i] > rhs.board[i]) return false;
-        return true;
+        int i = 0;
+        while (lhs.board[i] == rhs.board[i] and i < size_board * size_board) i++;
+        return lhs.board[i] < rhs.board[i];
     }
 
-    int pos(int i, int j) {
+    int pos(int i, int j) const {
         return i * size_board + j;
     }
 
-    std::pair<int, int> reverse_pos(int i) {
+    std::pair<int, int> reverse_pos(int i) const {
         std::pair<int, int> p;
         p.first = i / size_board;
         p.second = i % size_board;
@@ -54,7 +54,7 @@ class Board {
 
 
     // MOVE UP
-    bool is_move_up_valid() {
+    bool is_move_up_valid() const {
         return (empty_cell < size_board * (size_board - 1));
     }
 
@@ -69,7 +69,7 @@ class Board {
     }
 
     // MOVE BOTTOM
-    bool is_move_bottom_valid() {
+    bool is_move_bottom_valid() const {
         return (empty_cell >= size_board);
     }
 
@@ -84,7 +84,7 @@ class Board {
     }
 
     // MOVE RIGHT
-    bool is_move_right_valid() {
+    bool is_move_right_valid() const {
         return (empty_cell % size_board != 0);
     }
 
@@ -99,7 +99,7 @@ class Board {
     }
 
     //MOVE LEFT
-    bool is_move_left_valid() {
+    bool is_move_left_valid() const {
         return (empty_cell % size_board != size_board - 1);
     }
 
@@ -113,7 +113,7 @@ class Board {
         }
     }
 
-    bool is_move_possible(Direction d) {
+    bool is_move_possible(Direction d) const {
         switch(d) {
             case UP:
                 return is_move_up_valid();
@@ -143,7 +143,7 @@ class Board {
     }
 
     // PRINT
-    void display() {
+    void display() const {
         for (int i = 0; i < size_board; i++) {
             for (int j = 0; j < size_board; j++) {
                 if (board[pos(i, j)] != 0)
@@ -155,7 +155,7 @@ class Board {
         }
     }
 
-    std::vector<Direction> vector_of_valid_moves() {
+    std::vector<Direction> vector_of_valid_moves() const {
         std::vector<Direction> res;
         for (int d = UP; d <= LEFT; d++)
             if (is_move_possible(static_cast<Direction>(d)))
@@ -163,7 +163,7 @@ class Board {
         return res;
     }
 
-    std::vector<Board<size_board>> successors () {
+    std::vector<Board<size_board>> successors () const {
         std::vector<Board<size_board>> res;
         Board<size_board> b;
         for (auto d : vector_of_valid_moves()) {
@@ -183,15 +183,15 @@ class Board {
     }
 
     // Return the number of misplaced tiles
-    int distance() {
+    int distance() const {
         int cpt = 0;
         for (int i = 0; i < size_board * size_board; i++)
             cpt += (board[i] == i+1);
-        return cpt;
+        return size_board * size_board - cpt - 1;
     }
 
-    bool is_solved() {
-        return (distance() == size_board * size_board - 1);
+    bool is_solved() const {
+        return (distance() == 0);
     }
 
 };

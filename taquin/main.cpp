@@ -4,52 +4,16 @@
 #include "search.hpp"
 #include "taquin.hpp"
 
-void visual_tests() {
-    Taquin::Board<3> taq;
-    Taquin::Board<5> qat;
-
-    taq.display();
-    taq.move(BOTTOM);
-    std::cout << std::endl;
-    taq.display();
-    taq.move(RIGHT);
-    std::cout << std::endl;
-    taq.display();
-    taq.move(LEFT);
-    std::cout << std::endl;
-    taq.display();
-    taq.move(UP);
-    std::cout << std::endl;
-    taq.display();
-    std::cout << std::endl;
-    std::cout << taq.distance() << std::endl;
-    std::cout << std::endl;
-
-    std::cout << std::endl;
-    taq.shuffle(201);
-    taq.display();
-    std::cout << std::endl;
-    std::cout << taq.distance() << std::endl;
-
-    std::cout << std::endl;
-    std::cout << std::endl;
-    qat.shuffle(201);
-    qat.display();
-    std::cout << std::endl;
-    std::cout << taq.distance() << std::endl;
-
-    Taquin::SearchTree<5> astar_qt (qat);
-    astar_qt.init_state.display();
-    // Taquin::childs(astar_qt.init_state);
-}
-
 int main() {
     srand(time(NULL));
-    // visual_tests();
     Taquin::Board<3> taq;
+    std::vector<Taquin::Board<3>> shortest_path;
 
-    taq.shuffle(7);
+    taq.shuffle(100);
     Taquin::SearchTree<3> searchTaq (taq);
-    std::cout << searchTaq.a_star_search() << std::endl;
+    shortest_path = searchTaq.a_star_search();
+
+    Taquin::print_solution(shortest_path);
+    std::cout << shortest_path.size() << std::endl;
     return 0;
 }
