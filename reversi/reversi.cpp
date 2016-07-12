@@ -66,21 +66,25 @@ int8_t Board::score() {
  *  direction donnée
  */
 bool Board::is_action_vector(int i, int j, std::pair<int, int> v) const {
-    while (board[pos(i, j)] == player) {
+    do {
         i += v.first;
         j += v.second;
-    }
-    return board[pos(i, j)] == player;
+    } while (board[pos(i, j)] == -player and
+            i >= 0 and i < 8 and
+            j >= 0 and j < 8);
+    return  (i >= 0 and i < 8 and
+            j >= 0 and j < 8 and
+            board[pos(i, j)] == player);
 }
 
 void Board::action_vector(int i, int j, std::pair<int, int> v) {
     if (!is_action_vector(i, j, v)) return;
 
-    while (board[pos(i, j)] == player) {
+    do {
         i += v.first;
         j += v.second;
         board[pos(i, j)] = player;
-    }
+    } while (board[pos(i, j)] == player);
     return;
 }
 
