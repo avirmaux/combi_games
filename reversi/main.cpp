@@ -39,7 +39,7 @@ int cpu_vs_cpu() {
         rev.display();
         std::cout << std::endl;
         if (rev.player == 1) {
-            rev.move(rev.best_move(6));
+            rev.move(rev.best_move(7));
         } else {
             rev.move(rev.best_move(5));
         }

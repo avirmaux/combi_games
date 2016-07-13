@@ -32,7 +32,7 @@ std::pair<int, int> to_pair(Direction d) {
     }
 }
 
-Board::Board() : player(1) {
+Board::Board() : player(1), nmoves(0) {
     board.fill(0);
 
     board[pos(3, 4)] =  1; // black
@@ -50,13 +50,13 @@ void Board::display() const {
         for (int j = 0; j < 8; j++) {
             switch(board[pos(i, j)]) {
                 case 1:
-                    std::cout << "○ ";
+                    std::cout << "● ";
                     break;
                 case 0:
                     std::cout << "· ";
                     break;
                 case -1:
-                    std::cout << "● ";
+                    std::cout << "○ ";
                     break;
             }
             // std::cout << (int) board[pos(i, j)] << " ";
@@ -158,6 +158,7 @@ void Board::move(int i, int j) {
     }
 
     player = -player;
+    nmoves++;
 }
 
 void Board::move(std::pair<int, int> p) {
@@ -186,7 +187,7 @@ int8_t Board::score() const {
 float Board::eval() const {
     float sum = 0;
 
-    if (is_finished()) return win();
+    if (nmoves > 50 and is_finished()) return win();
 
     const std::array<int, 8*8> static_evaluation_table =
     {  5, -1, 1, 1, 1, 1, -1,  5,

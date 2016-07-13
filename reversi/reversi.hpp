@@ -15,6 +15,7 @@ class Board {
 
     std::array<int8_t, 8*8> board;
     int8_t player;
+    int8_t nmoves;
 
     Board();
 
