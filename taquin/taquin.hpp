@@ -182,12 +182,32 @@ class Board {
         }
     }
 
-    // Return the number of misplaced tiles
-    int distance() const {
+    int distance_missplaced() const {
         int cpt = 0;
         for (int i = 0; i < size_board * size_board; i++)
             cpt += (board[i] == i+1);
         return size_board * size_board - cpt - 1;
+    }
+
+    // Return the sum of distance of every tile with its destination
+    int distance_manhattan() const {
+        int cpt = 0;
+        std::pair<int, int> p;
+        for (int i = 0; i < size_board; i++) {
+            for (int j = 0; j < size_board; j++) {
+                if (board[pos(i, j)] > 0) {
+                    p = reverse_pos(board[pos(i, j)] - 1);
+                    cpt += abs(p.first - i);
+                    cpt += abs(p.second - j);
+                }
+            }
+        }
+        return cpt;
+    }
+
+    inline int distance() const {
+        // return distance_missplaced();
+        return distance_manhattan();
     }
 
     bool is_solved() const {

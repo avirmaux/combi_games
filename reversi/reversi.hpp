@@ -20,11 +20,11 @@ class Board {
     int8_t score();
 
     // MOUVEMENTS
-    bool is_legal_move(int i, int j) const;
-    void move(int i, int j);
+    bool is_legal_move(int, int) const;
+    void move(int, int);
 
-    bool is_action_vector(int i, int j, std::pair<int, int>) const;
-    void action_vector(int i, int j, std::pair<int, int> v);
+    bool is_action_vector(int, int, std::pair<int, int>) const;
+    void action_vector(int, int, std::pair<int, int>);
 };
 
 } // end of namespace
