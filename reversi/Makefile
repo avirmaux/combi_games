@@ -10,5 +10,6 @@ all:  reversi.o main.o
 %.o : %.cpp
 	$(CXX) $^ -c $(CXXFLAGS) $(CXXLIBS) $(CXXDEF)
 
+.PHONY:
 clean:
 	rm *.o

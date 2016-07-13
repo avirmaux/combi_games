@@ -166,10 +166,42 @@ void Board::move(std::pair<int, int> p) {
 
 
 // WINNING AND EVALUATION
-int8_t Board::eval() const {
+int8_t Board::score() const {
     int sum = 0;
     for(auto x : board) sum += x;
     return sum;
+}
+
+/* Evaluation function
+ *
+ * Corner   +5
+ * X-square -2
+ * C-square -1
+ * Sweet 16 +1
+ * Other    +1
+ *
+ * Output: float between -1 (victory of player -1) and 1 (victory of player 1)
+ */
+
+float Board::eval() const {
+    float sum = 0;
+
+    if (is_finished()) return win();
+
+    const std::array<int, 8*8> static_evaluation_table =
+    {  5, -1, 1, 1, 1, 1, -1,  5,
+      -1, -2, 1, 1, 1, 1, -2, -1,
+       1,  1, 2, 2, 2, 2,  1,  1,
+       1,  1, 2, 2, 2, 2,  1,  1,
+       1,  1, 2, 2, 2, 2,  1,  1,
+       1,  1, 2, 2, 2, 2,  1,  1,
+      -1, -2, 1, 1, 1, 1, -2, -1,
+       5, -1, 1, 1, 1, 1, -1,  5 };
+    const int sum_total =
+        std::accumulate(static_evaluation_table.begin(), static_evaluation_table.end(), 0);
+    for (int i = 0; i < 8*8; i++)
+        sum += player*static_evaluation_table[i]*board[i];
+    return sum / sum_total;
 }
 
 bool Board::is_finished() const {
@@ -177,8 +209,10 @@ bool Board::is_finished() const {
 }
 
 int8_t Board::win() const {
+    int8_t s;
     if (!is_finished()) return 0;
-    return (eval() > 0) - (eval() < 0);
+    s = score();
+    return (s > 0) - (s < 0);
 }
 
 /* Return a random `best move` for Alpha Beta pruning.
@@ -192,7 +226,8 @@ int8_t Board::win() const {
 std::pair<int, int> Board::best_move(int depth) const {
     Board exploration;
     std::pair<int, int> best;
-    int8_t s, best_score = 0;
+    int8_t best_score = 0;
+    float s;
 
     std::vector<std::pair<int, int>> ch = childs();
     best = ch[rand()%ch.size()]; // Default is random move
@@ -201,7 +236,7 @@ std::pair<int, int> Board::best_move(int depth) const {
     for (auto x : ch) {
         exploration = *this;
         exploration.move(x);
-        s = alpha_beta(exploration, depth, -64, 64);
+        s = alpha_beta(exploration, depth, -1, 1);
         if ((player == 1  and s > best_score) or
             (player == -1 and s < best_score)) {
                 best_score = s;

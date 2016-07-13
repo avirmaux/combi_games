@@ -6,8 +6,7 @@ T alpha_beta(C game, int depth, T alpha, T beta) {
     T val, best;
 
     // Terminal case
-    if (depth == 0) return game.eval();
-    if (game.is_finished()) return game.eval();
+    if (depth == 0 or game.is_finished()) return game.eval();
 
     // Exploration
 

@@ -2,6 +2,7 @@
 #include <array>
 #include <vector>
 #include <utility>
+#include <numeric>
 
 #include "../include/alphabeta.hpp"
 
@@ -34,7 +35,8 @@ class Board {
 
     // WIN AND EVALUATION
     bool is_finished() const;
-    int8_t eval() const;
+    int8_t score() const;
+    float eval() const;
     int8_t win() const;
 
     std::pair<int, int> best_move(int) const;

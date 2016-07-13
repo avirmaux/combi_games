@@ -16,3 +16,6 @@ Solver using A\*-search algorithm with heuristics:
 * Manhattan distance
 
 ### Reversi
+
+## Include
+* alphabeta pruning
