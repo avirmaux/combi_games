@@ -1,5 +1,6 @@
 #include <iostream>
 #include <array>
+#include <vector>
 #include <utility>
 
 namespace Reversi {
@@ -17,14 +18,23 @@ class Board {
     int pos(int, int) const;
     void display() const;
 
-    int8_t score();
-
     // MOUVEMENTS
+    std::vector<std::pair<int, int>> legal_directions(int, int) const;
     bool is_legal_move(int, int) const;
     void move(int, int);
 
+    std::vector<std::pair<int, int>> vector_of_legal_moves() const;
+
     bool is_action_vector(int, int, std::pair<int, int>) const;
     void action_vector(int, int, std::pair<int, int>);
+
+    // WIN AND EVALUATION
+    bool is_finished() const;
+    int8_t eval() const;
+    int8_t win() const;
+
+    private:
+    bool is_legal_move_fast(int i, int j) const;
 };
 
 } // end of namespace

@@ -35,10 +35,10 @@ std::pair<int, int> to_pair(Direction d) {
 Board::Board() : player(1) {
     board.fill(0);
 
-    board[pos(3, 3)] = -1; // white
-    board[pos(4, 4)] = -1;
     board[pos(3, 4)] =  1; // black
     board[pos(4, 3)] =  1;
+    board[pos(3, 3)] = -1; // white
+    board[pos(4, 4)] = -1;
 };
 
 int Board::pos(int i, int j) const {
@@ -65,12 +65,6 @@ void Board::display() const {
     }
 }
 
-int8_t Board::score() {
-    int sum = 0;
-    for(auto x : board) sum += x;
-    return sum;
-}
-
 /* Renvoie si un booléen si des jetons vont être retournés dans la directions
  * donnée par un vecteur.
  *
@@ -83,7 +77,9 @@ int8_t Board::score() {
  *  direction donnée
  */
 bool Board::is_action_vector(int i, int j, std::pair<int, int> v) const {
+    int cpt = -1; // At least one adversary token in between
     do {
+        cpt++;
         i += v.first;
         j += v.second;
     } while ( i >= 0 and i < 8 and
@@ -91,6 +87,7 @@ bool Board::is_action_vector(int i, int j, std::pair<int, int> v) const {
               board[pos(i, j)] == -player);
     return  ( i >= 0 and i < 8 and
               j >= 0 and j < 8 and
+              cpt > 0 and
               board[pos(i, j)] == player);
 }
 
@@ -110,26 +107,66 @@ void Board::action_vector(int i, int j, std::pair<int, int> v) {
     } while (board[pos(i, j)] == -player);
 }
 
-bool Board::is_legal_move(int i, int j) const {
-    if (board[pos(i, j)] != 0) return false;
+/* Return the vector of directions in which tokens will be flipped over
+ */
+std::vector<std::pair<int, int>> Board::legal_directions(int i, int j) const {
+    std::vector<std::pair<int, int>> res;
+    if (board[pos(i, j)] != 0) return res;
     for (int d = N; d <= NW; d++) {
         if (is_action_vector(i, j, to_pair(static_cast<Direction>(d)))) {
-            std::cout << "Direction " << to_pair(static_cast<Direction>(d)).first << " - " <<
-                to_pair(static_cast<Direction>(d)).second << std::endl;
-            return true;
+            res.push_back(to_pair(static_cast<Direction>(d)));
         }
     }
+    return res;
+}
+
+bool Board::is_legal_move_fast(int i, int j) const {
+    if (board[pos(i, j)] != 0) return false;
+    for (int d = N; d <= NW; d++)
+        if (is_action_vector(i, j, to_pair(static_cast<Direction>(d))))
+            return true;
     return false;
 }
 
-void Board::move(int i, int j) {
-    if (!is_legal_move(i, j)) return;
+// Return true if a move is legal
+bool Board::is_legal_move(int i, int j) const {
+    return !(legal_directions(i, j).empty());
+}
 
-    for (int d = N; d <= NW; d++) {
-        action_vector(i, j, to_pair(static_cast<Direction>(d)));
+std::vector<std::pair<int, int>> Board::vector_of_legal_moves() const{
+    std::vector<std::pair<int, int>> res;
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+            if (is_legal_move_fast(i, j))
+                res.push_back({i, j});
+    return res;
+}
+
+void Board::move(int i, int j) {
+    std::vector<std::pair<int, int>> dir = legal_directions(i, j);
+    if (dir.empty()) return; // Not a legal move
+
+    for (auto v : dir) {
+        action_vector(i, j, v);
     }
 
     player = -player;
+}
+
+// WINNING AND EVALUATION
+int8_t Board::eval() const {
+    int sum = 0;
+    for(auto x : board) sum += x;
+    return sum;
+}
+
+bool Board::is_finished() const {
+    return (vector_of_legal_moves().empty());
+}
+
+int8_t Board::win() const {
+    if (!is_finished()) return 0;
+    return (eval() > 0) - (eval() < 0);
 }
 
 } // end of namespace
