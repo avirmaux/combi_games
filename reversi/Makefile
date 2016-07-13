@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-Wall -W -std=c++17 -g
+CXXFLAGS=-Wall -W -std=c++17 -O2
 # CXXLIBS=-fcilkplus
 # CXXDEF=-D _VERBOSE
 LDFLAGS=

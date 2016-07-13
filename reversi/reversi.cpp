@@ -50,13 +50,13 @@ void Board::display() const {
         for (int j = 0; j < 8; j++) {
             switch(board[pos(i, j)]) {
                 case 1:
-                    std::cout << "o ";
+                    std::cout << "○ ";
                     break;
                 case 0:
                     std::cout << "· ";
                     break;
                 case -1:
-                    std::cout << "x ";
+                    std::cout << "● ";
                     break;
             }
             // std::cout << (int) board[pos(i, j)] << " ";
@@ -142,9 +142,16 @@ std::vector<std::pair<int, int>> Board::vector_of_legal_moves() const{
     return res;
 }
 
+std::vector<std::pair<int, int>> Board::childs() const {
+    return vector_of_legal_moves();
+}
+
 void Board::move(int i, int j) {
     std::vector<std::pair<int, int>> dir = legal_directions(i, j);
-    if (dir.empty()) return; // Not a legal move
+    if (dir.empty()) {
+        std::cerr << i << " " << j << " is not a legal move" << std::endl;
+        return; // Not a legal move
+    }
 
     for (auto v : dir) {
         action_vector(i, j, v);
@@ -152,6 +159,11 @@ void Board::move(int i, int j) {
 
     player = -player;
 }
+
+void Board::move(std::pair<int, int> p) {
+    move(p.first, p.second);
+}
+
 
 // WINNING AND EVALUATION
 int8_t Board::eval() const {
@@ -167,6 +179,40 @@ bool Board::is_finished() const {
 int8_t Board::win() const {
     if (!is_finished()) return 0;
     return (eval() > 0) - (eval() < 0);
+}
+
+/* Return a random `best move` for Alpha Beta pruning.
+ *
+ * Input:
+ *  - depth, the depth of the search
+ *
+ *  Output:
+ *  - pair (i, j) of the best_move
+ */
+std::pair<int, int> Board::best_move(int depth) const {
+    Board exploration;
+    std::pair<int, int> best;
+    int8_t s, best_score = 0;
+
+    std::vector<std::pair<int, int>> ch = childs();
+    best = ch[rand()%ch.size()]; // Default is random move
+
+
+    for (auto x : ch) {
+        exploration = *this;
+        exploration.move(x);
+        s = alpha_beta(exploration, depth, -64, 64);
+        if ((player == 1  and s > best_score) or
+            (player == -1 and s < best_score)) {
+                best_score = s;
+                best = x;
+        }
+    }
+    return best;
+}
+
+std::pair<int, int> Board::best_move() const {
+    return best_move(4);
 }
 
 } // end of namespace
