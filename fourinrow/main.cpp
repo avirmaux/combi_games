@@ -28,7 +28,7 @@ void human_vs_CPU() {
             game.move(i);
         }
         else {
-            game.move(CPU_move_mc(game, 6000));
+            game.move(CPU_move_mc(game, 10000));
             // game.move(CPU_move_ab(game));
         }
         game.display();

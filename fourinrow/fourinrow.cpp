@@ -20,10 +20,10 @@ void FourInRow::display() {
         for (int j = 0; j < 7; j++) {
             switch (pos(i, j)) {
                 case -1:
-                    std::cout << " o ";
+                    std::cout << " ● ";
                     break;
                 case 1:
-                    std::cout << " x ";
+                    std::cout << " ○ ";
                     break;
                 default:
                     std::cout << " . ";
