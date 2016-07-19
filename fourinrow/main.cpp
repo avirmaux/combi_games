@@ -28,7 +28,7 @@ void human_vs_CPU() {
             game.move(i);
         }
         else {
-            game.move(CPU_move_mc(game, 2000));
+            game.move(CPU_move_mc(game, 6000));
             // game.move(CPU_move_ab(game));
         }
         game.display();
@@ -48,12 +48,13 @@ int ab_vs_mc(void) {
     while (game.nmoves < 42 and game.win() == 0) {
         if (game.player == 1) {
             game.move(CPU_move_ab(game));
+            // game.move(CPU_move_mc(game, 3000));
         }
         else {
-            game.move(CPU_move_mc(game, 2000));
+            game.move(CPU_move_mc(game, 6000));
         }
-        // game.display();
-        // std::cout << std::endl;
+        game.display();
+        std::cout << std::endl;
     }
     return game.win();
 }
@@ -78,6 +79,8 @@ int main() {
     // exit(0);
 
     human_vs_CPU();
+    //
+    // std::cout << (int) ab_vs_mc() << std::endl;
 
     // Alpha Beta vs Monte Carlo
     // meta_ab_vs_mc();

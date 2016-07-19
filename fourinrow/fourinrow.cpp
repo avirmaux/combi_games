@@ -1,3 +1,7 @@
+#include <iostream>
+#include <cstdint>
+#include <algorithm>
+
 #include "alphabeta.hpp"
 #include "fourinrow.hpp"
 

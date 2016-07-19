@@ -1,12 +1,8 @@
 #ifndef _PUISSANCE_H
 #define _PUISSANCE_H
 
-#include <iostream>
-#include <cstdint>
-#include <algorithm>
 #include <map>
 #include <vector>
-
 
 class FourInRow {
     public:

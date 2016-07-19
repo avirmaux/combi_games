@@ -2,11 +2,12 @@
 #include <cstdlib>
 
 #include "reversi.hpp"
+#include "search.hpp"
 
 int human_vs_human() {
-    Reversi::Board rev;
+    Board rev;
     int i, j;
-    while(!rev.is_finished()) {
+    while(!rev.end_game()) {
         rev.display();
         std::cout << std::endl;
         std::cin >> i >> j;
@@ -17,16 +18,16 @@ int human_vs_human() {
 }
 
 int cpu_vs_human() {
-    Reversi::Board rev;
+    Board rev;
     int i, j;
-    while(!rev.is_finished()) {
+    while(!rev.end_game()) {
         rev.display();
         std::cout << std::endl;
-        if (rev.player == -1) {
+        if (rev.side_to_move() == BLACK) {
             std::cin >> i >> j;
             rev.move(i, j);
         } else {
-            rev.move(rev.best_move());
+            rev.move(Search::best_move(rev, 9));
         }
     }
     rev.display();
@@ -34,14 +35,14 @@ int cpu_vs_human() {
 }
 
 int cpu_vs_cpu() {
-    Reversi::Board rev;
-    while(!rev.is_finished()) {
+    Board rev;
+    while(!rev.end_game()) {
         rev.display();
         std::cout << std::endl;
-        if (rev.player == 1) {
-            rev.move(rev.best_move(7));
+        if (rev.side_to_move() == BLACK) {
+            rev.move(Search::best_move(rev, 8));
         } else {
-            rev.move(rev.best_move(5));
+            rev.move(Search::best_move(rev, 5));
         }
     }
     rev.display();
@@ -51,10 +52,11 @@ int cpu_vs_cpu() {
 
 int main() {
     srand(time(NULL));
-    // Reversi::Board rev;
+    Board rev;
     // rev.display();
     // human_vs_human();
     // cpu_vs_human();
+    std::cout << cpu_vs_cpu() << std::endl;
 
     // Average win
     // int avg = 0;
@@ -65,7 +67,8 @@ int main() {
     // std::cout << "--" << std::endl;
     // std::cout << avg / 10 << std::endl;
     //
-    std::cout << cpu_vs_cpu() << std::endl;
+    // std::cout << cpu_vs_cpu() << std::endl;
+    // std::cout << cpu_vs_human() << std::endl;
 
     return 0;
 }
