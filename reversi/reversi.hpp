@@ -26,23 +26,31 @@ class Board {
     void set_piece(std::pair<int, int>, Color);
 
     // Mouvements
-    void move(int, int);
-    void move(std::pair<int, int>);
+    void make_move(int, int);
+    void make_move(std::pair<int, int>);
 
+    void undo_move(int, int);
+    void undo_move(std::pair<int, int>);
+
+
+    // List of mouvements
     std::vector<std::pair<int, int>> legal_moves() const;
     std::vector<std::pair<int, int>> legal_moves(Color player) const;
 
+    std::vector<std::pair<int, int>> childs() const;
+
+    // 2D
     bool is_legal_move(int, int) const;
     bool is_legal_move(int i, int j, Color player) const;
-
-    std::vector<std::pair<int, int>> childs() const;
+    // 1D
+    bool is_legal_move(int i, Color player) const;
+    bool is_legal_move(int i) const;
 
     // Win
     bool end_game() const;
     int8_t score() const;
 
     // Search
-    float eval() const;
     Color win() const;
 
     std::pair<int, int> best_move(int) const;
@@ -55,10 +63,10 @@ class Board {
     int8_t nbr_pieces;
 
     // Mouvement
-    bool is_legal_direction(int i, int j, std::pair<int, int> v, Color player) const;
-    bool is_legal_direction(int, int, std::pair<int, int>) const;
-    std::vector<std::pair<int, int>> legal_directions(int, int) const;
-    void flip_direction(int, int, std::pair<int, int>);
+    bool is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v, Color player) const;
+    bool is_legal_direction(int, int, std::pair<int8_t, int8_t>) const;
+    std::vector<std::pair<int8_t, int8_t>> legal_directions(int, int) const;
+    void flip_direction(int, int, std::pair<int8_t, int8_t>);
 };
 
 inline Color Board::piece(int i) const {

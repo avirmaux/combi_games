@@ -46,7 +46,7 @@ void Board::display() const {
  *  la présence d'un jeton de la même couleur que le jeton en i, j dans la
  *  direction donnée
  */
-bool Board::is_legal_direction(int i, int j, std::pair<int, int> v, Color player) const {
+bool Board::is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v, Color player) const {
     Color currentColor = player;
     Color oppositeColor = (player == BLACK) ? WHITE : BLACK;
     int cpt = -1; // At least one adversary token in between
@@ -62,7 +62,7 @@ bool Board::is_legal_direction(int i, int j, std::pair<int, int> v, Color player
               cpt > 0 and
               piece(i, j) == currentColor);
 }
-bool Board::is_legal_direction(int i, int j, std::pair<int, int> v) const {
+bool Board::is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v) const {
     return is_legal_direction(i, j, v, sideToMove);
 }
 
@@ -72,7 +72,7 @@ bool Board::is_legal_direction(int i, int j, std::pair<int, int> v) const {
  *  - i, j: position du coup
  *  - v: pair d'éléments de {-1, 0, 1} représentation une direction
  */
-void Board::flip_direction(int i, int j, std::pair<int, int> v) {
+void Board::flip_direction(int i, int j, std::pair<int8_t, int8_t> v) {
     Color currentColor = sideToMove;
     Color oppositeColor = (sideToMove == BLACK) ? WHITE : BLACK;
 
@@ -87,8 +87,8 @@ void Board::flip_direction(int i, int j, std::pair<int, int> v) {
 
 /* Return the vector of directions in which tokens will be flipped over
  */
-std::vector<std::pair<int, int>> Board::legal_directions(int i, int j) const {
-    std::vector<std::pair<int, int>> res;
+std::vector<std::pair<int8_t, int8_t>> Board::legal_directions(int i, int j) const {
+    std::vector<std::pair<int8_t, int8_t>> res;
     if (piece(i, j) != EMPTY) return res;
     for (int d = N; d < DIRECTION_NB; d++) {
         if (is_legal_direction(i, j, to_pair(static_cast<Direction>(d)))) {
@@ -99,6 +99,8 @@ std::vector<std::pair<int, int>> Board::legal_directions(int i, int j) const {
 }
 
 // Return true if a move is legal
+
+// Index 2D with color
 bool Board::is_legal_move(int i, int j, Color player) const {
     if (piece(i, j) != EMPTY) return false;
     for (int d = N; d < DIRECTION_NB; d++)
@@ -107,12 +109,26 @@ bool Board::is_legal_move(int i, int j, Color player) const {
     return false;
 }
 
+// Index 2D
 bool Board::is_legal_move(int i, int j) const {
     if (piece(i, j) != EMPTY) return false;
     for (int d = N; d < DIRECTION_NB; d++)
         if (is_legal_direction(i, j, to_pair(static_cast<Direction>(d))))
             return true;
     return false;
+}
+
+// Indexed by i \in 0 .. 63
+bool Board::is_legal_move(int i, Color player) const {
+    if (piece(i) != EMPTY) return false;
+    for (int d = N; d < DIRECTION_NB; d++)
+        if (is_legal_direction(i/8, i%8, to_pair(static_cast<Direction>(d)), player))
+            return true;
+    return false;
+}
+
+bool Board::is_legal_move(int i) const {
+    return is_legal_move(i, side_to_move());
 }
 
 // Return all legal moves in a vector
@@ -132,8 +148,10 @@ std::vector<std::pair<int, int>> Board::childs() const {
     return legal_moves();
 }
 
-void Board::move(int i, int j) {
-    std::vector<std::pair<int, int>> dir = legal_directions(i, j);
+// Mouvements
+
+void Board::make_move(int i, int j) {
+    std::vector<std::pair<int8_t, int8_t>> dir = legal_directions(i, j);
     if (dir.empty()) {
         std::cerr << i << " " << j << " is not a legal move" << std::endl;
         return; // Not a legal move
@@ -149,8 +167,29 @@ void Board::move(int i, int j) {
     nbr_pieces++;
 }
 
-void Board::move(std::pair<int, int> p) {
-    move(p.first, p.second);
+void Board::make_move(std::pair<int, int> p) {
+    make_move(p.first, p.second);
+}
+
+void Board::undo_move(int i, int j) {
+    Color us = piece(i, j);
+    Color them = (us == BLACK)? WHITE : BLACK;
+    std::pair<int8_t, int8_t> dir;
+    set_piece(i, j, EMPTY);
+    for (int d = N; d < DIRECTION_NB; d++) {
+        dir = to_pair(static_cast<Direction>(d));
+        i += dir.first;
+        j += dir.second;
+        while (piece(i, j) == us) {
+            set_piece(i, j, them);
+            i += dir.first;
+            j += dir.second;
+        }
+    }
+}
+
+void Board::undo_move(std::pair<int, int> v) {
+    undo_move(v.first, v.second);
 }
 
 void Board::set_piece(int i, int j, Color c) {
@@ -179,26 +218,6 @@ int8_t Board::score() const {
  * Output: float between -1 (victory of sideToMove -1) and 1 (victory of sideToMove 1)
  */
 
-float Board::eval() const {
-    float sum = 0;
-
-    if (nbr_pieces > 50 and end_game()) return win();
-
-    const std::array<int, 8*8> static_evaluation_table =
-    {  5, -1, 1, 1, 1, 1, -1,  5,
-      -1, -2, 1, 1, 1, 1, -2, -1,
-       1,  1, 2, 2, 2, 2,  1,  1,
-       1,  1, 2, 2, 2, 2,  1,  1,
-       1,  1, 2, 2, 2, 2,  1,  1,
-       1,  1, 2, 2, 2, 2,  1,  1,
-      -1, -2, 1, 1, 1, 1, -2, -1,
-       5, -1, 1, 1, 1, 1, -1,  5 };
-    const int sum_total =
-        std::accumulate(static_evaluation_table.begin(), static_evaluation_table.end(), 0);
-    for (int i = 0; i < 8*8; i++)
-        sum += sideToMove*static_evaluation_table[i]*piece(i);
-    return sum / sum_total;
-}
 
 bool Board::end_game() const {
     return (legal_moves(BLACK).empty()) and (legal_moves(WHITE).empty());

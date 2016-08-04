@@ -4,7 +4,7 @@ CXXFLAGS=-Wall -W -std=c++17 -O2
 # CXXDEF=-D _VERBOSE
 LDFLAGS=
 
-all:  reversi.o misc.o search.o main.o
+all:  reversi.o misc.o search.o evaluate.o main.o
 	$(CXX) $^ $(CXXLIBS) $(LDFLAGS)
 
 %.o : %.cpp

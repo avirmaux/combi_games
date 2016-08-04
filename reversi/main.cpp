@@ -2,6 +2,8 @@
 #include <cstdlib>
 
 #include "reversi.hpp"
+#include "evaluate.hpp"
+#include "types.hpp"
 #include "search.hpp"
 
 int human_vs_human() {
@@ -11,10 +13,10 @@ int human_vs_human() {
         rev.display();
         std::cout << std::endl;
         std::cin >> i >> j;
-        rev.move(i, j);
+        rev.make_move(i, j);
     }
     rev.display();
-    return rev.eval();
+    return Eval::evaluate_position(rev);
 }
 
 int cpu_vs_human() {
@@ -25,13 +27,13 @@ int cpu_vs_human() {
         std::cout << std::endl;
         if (rev.side_to_move() == BLACK) {
             std::cin >> i >> j;
-            rev.move(i, j);
+            rev.make_move(i, j);
         } else {
-            rev.move(Search::best_move(rev, 9));
+            rev.make_move(Search::best_move(rev, 9));
         }
     }
     rev.display();
-    return rev.eval();
+    return Eval::evaluate_position(rev);
 }
 
 int cpu_vs_cpu() {
@@ -40,9 +42,9 @@ int cpu_vs_cpu() {
         rev.display();
         std::cout << std::endl;
         if (rev.side_to_move() == BLACK) {
-            rev.move(Search::best_move(rev, 8));
+            rev.make_move(Search::best_move(rev, 8));
         } else {
-            rev.move(Search::best_move(rev, 5));
+            rev.make_move(Search::best_move(rev, 5));
         }
     }
     rev.display();
