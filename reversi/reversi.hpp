@@ -9,6 +9,7 @@
 #include "types.hpp"
 
 class Board {
+
     public:
 
     Board();
@@ -26,25 +27,25 @@ class Board {
     void set_piece(std::pair<int, int>, Color);
 
     // Mouvements
-    void make_move(int, int);
-    void make_move(std::pair<int, int>);
+    std::vector<std::pair<int8_t, int8_t>> make_move(Move m);
+    std::vector<std::pair<int8_t, int8_t>> make_move(int, int);
+    std::vector<std::pair<int8_t, int8_t>> make_move(std::pair<int, int>);
 
-    void undo_move(int, int);
-    void undo_move(std::pair<int, int>);
+    void undo_move(Move m, std::vector<std::pair<int8_t, int8_t>>);
+    void undo_move(int, int, std::vector<std::pair<int8_t, int8_t>>);
+    void undo_move(std::pair<int, int>, std::vector<std::pair<int8_t, int8_t>>);
 
 
     // List of mouvements
-    std::vector<std::pair<int, int>> legal_moves() const;
-    std::vector<std::pair<int, int>> legal_moves(Color player) const;
-
-    std::vector<std::pair<int, int>> childs() const;
+    std::vector<Move> legal_moves() const;
+    std::vector<Move> legal_moves(Color player) const;
 
     // 2D
     bool is_legal_move(int, int) const;
     bool is_legal_move(int i, int j, Color player) const;
     // 1D
-    bool is_legal_move(int i, Color player) const;
-    bool is_legal_move(int i) const;
+    bool is_legal_move(Move i, Color player) const;
+    bool is_legal_move(Move i) const;
 
     // Win
     bool end_game() const;
@@ -57,12 +58,14 @@ class Board {
     std::pair<int, int> best_move() const;
 
     private:
+
     // Data member
     std::array<Color, 8*8> board;
     Color sideToMove;
     int8_t nbr_pieces;
 
     // Mouvement
+
     bool is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v, Color player) const;
     bool is_legal_direction(int, int, std::pair<int8_t, int8_t>) const;
     std::vector<std::pair<int8_t, int8_t>> legal_directions(int, int) const;

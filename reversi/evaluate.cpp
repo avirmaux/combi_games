@@ -17,14 +17,14 @@ namespace Eval {
     const int sum_evaluation_table_total =
         std::accumulate(static_evaluation_table.begin(), static_evaluation_table.end(), 0);
 
-    int evaluate_position(const Board& board) {
-        Color us = board.side_to_move();
-        int sum = 0;
-        if (board.end_game()) return board.win();
+    Value evaluate_position(const Board& pos) {
+        Color us = pos.side_to_move();
+        Value sum = SCORE_ZERO;
+        if (pos.end_game()) return (us == BLACK)? VALUE_INFINITE : -VALUE_INFINITE;
 
         for (int i = 0; i < 8*8; i++)
-            sum += static_evaluation_table[i] * ((board.piece(i) == us)? 1 : -1);
-        return (board.side_to_move() == WHITE)? sum : -sum;
+            sum += static_evaluation_table[i] * ((pos.piece(i) == us)? 1 : -1);
+        return (pos.side_to_move() == BLACK)? sum : -sum;
     }
 
 } // end of namespace Eval

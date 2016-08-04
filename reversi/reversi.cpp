@@ -47,8 +47,8 @@ void Board::display() const {
  *  direction donnée
  */
 bool Board::is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v, Color player) const {
-    Color currentColor = player;
-    Color oppositeColor = (player == BLACK) ? WHITE : BLACK;
+    Color us = player;
+    Color them = (player == BLACK) ? WHITE : BLACK;
     int cpt = -1; // At least one adversary token in between
     do {
         cpt++;
@@ -56,14 +56,14 @@ bool Board::is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v, Color 
         j += v.second;
     } while ( i >= 0 and i < 8 and
               j >= 0 and j < 8 and
-              piece(i, j) == oppositeColor);
+              piece(i, j) == them);
     return  ( i >= 0 and i < 8 and
               j >= 0 and j < 8 and
               cpt > 0 and
-              piece(i, j) == currentColor);
+              piece(i, j) == us);
 }
 bool Board::is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v) const {
-    return is_legal_direction(i, j, v, sideToMove);
+    return is_legal_direction(i, j, v, side_to_move());
 }
 
 /* Applique un retournement le long de l'axe v si légal
@@ -73,16 +73,16 @@ bool Board::is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v) const 
  *  - v: pair d'éléments de {-1, 0, 1} représentation une direction
  */
 void Board::flip_direction(int i, int j, std::pair<int8_t, int8_t> v) {
-    Color currentColor = sideToMove;
-    Color oppositeColor = (sideToMove == BLACK) ? WHITE : BLACK;
+    Color us = side_to_move();
+    Color them = (side_to_move() == BLACK) ? WHITE : BLACK;
 
     if (!is_legal_direction(i, j, v)) return;
 
     do {
-        set_piece(i, j, currentColor);; // First one is the actual play
+        set_piece(i, j, us);; // First one is the actual play
         i += v.first;
         j += v.second;
-    } while (piece(i, j) == oppositeColor);
+    } while (piece(i, j) == them);
 }
 
 /* Return the vector of directions in which tokens will be flipped over
@@ -118,8 +118,8 @@ bool Board::is_legal_move(int i, int j) const {
     return false;
 }
 
-// Indexed by i \in 0 .. 63
-bool Board::is_legal_move(int i, Color player) const {
+// Indexed by Move i \in 0 .. 63
+bool Board::is_legal_move(Move i, Color player) const {
     if (piece(i) != EMPTY) return false;
     for (int d = N; d < DIRECTION_NB; d++)
         if (is_legal_direction(i/8, i%8, to_pair(static_cast<Direction>(d)), player))
@@ -127,69 +127,76 @@ bool Board::is_legal_move(int i, Color player) const {
     return false;
 }
 
-bool Board::is_legal_move(int i) const {
+bool Board::is_legal_move(Move i) const {
     return is_legal_move(i, side_to_move());
 }
 
-// Return all legal moves in a vector
-std::vector<std::pair<int, int>> Board::legal_moves(Color player) const{
-    std::vector<std::pair<int, int>> res;
-    for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++)
-            if (is_legal_move(i, j, player))
-                res.push_back({i, j});
+// Return all legal moves in a vector of Move
+std::vector<Move> Board::legal_moves(Color player) const{
+    std::vector<Move> res;
+    for (int i = 0; i < 8*8; i++)
+            if (is_legal_move((Move) i, player))
+                res.push_back(i);
     return res;
 }
-std::vector<std::pair<int, int>> Board::legal_moves() const{
-    return legal_moves(sideToMove);
-}
 
-std::vector<std::pair<int, int>> Board::childs() const {
-    return legal_moves();
+std::vector<Move> Board::legal_moves() const{
+    return legal_moves(side_to_move());
 }
 
 // Mouvements
 
-void Board::make_move(int i, int j) {
+std::vector<std::pair<int8_t, int8_t>> Board::make_move(int i, int j) {
     std::vector<std::pair<int8_t, int8_t>> dir = legal_directions(i, j);
     if (dir.empty()) {
         std::cerr << i << " " << j << " is not a legal move" << std::endl;
-        return; // Not a legal move
+        return {}; // Not a legal move
     }
 
     for (auto v : dir) {
         flip_direction(i, j, v);
     }
 
-    sideToMove = (sideToMove == WHITE)? BLACK : WHITE;
-    if (legal_moves().empty())
+    if (!legal_moves().empty())
         sideToMove = (sideToMove == WHITE)? BLACK : WHITE;
     nbr_pieces++;
+    return dir;
 }
 
-void Board::make_move(std::pair<int, int> p) {
-    make_move(p.first, p.second);
+std::vector<std::pair<int8_t, int8_t>> Board::make_move(std::pair<int, int> p) {
+    return make_move(p.first, p.second);
 }
 
-void Board::undo_move(int i, int j) {
+std::vector<std::pair<int8_t, int8_t>> Board::make_move(Move m) {
+    return make_move(m/8, m%8);
+}
+
+void Board::undo_move(int i, int j, std::vector<std::pair<int8_t, int8_t>> dirs) {
     Color us = piece(i, j);
     Color them = (us == BLACK)? WHITE : BLACK;
-    std::pair<int8_t, int8_t> dir;
+    int k, l;
+
     set_piece(i, j, EMPTY);
-    for (int d = N; d < DIRECTION_NB; d++) {
-        dir = to_pair(static_cast<Direction>(d));
-        i += dir.first;
-        j += dir.second;
-        while (piece(i, j) == us) {
-            set_piece(i, j, them);
-            i += dir.first;
-            j += dir.second;
+    for (auto &d : dirs) {
+        k = i + d.first;
+        l = j + d.second;
+        while (k >= 0 and k < 8 and
+               l >= 0 and l < 8 and
+               piece(k, l) == us) {
+            set_piece(k, l, them);
+            k += d.first;
+            l += d.second;
         }
+        set_piece(k - d.first, l - d.second, us);
     }
 }
 
-void Board::undo_move(std::pair<int, int> v) {
-    undo_move(v.first, v.second);
+void Board::undo_move(std::pair<int, int> v, std::vector<std::pair<int8_t, int8_t>> dirs) {
+    undo_move(v.first, v.second, dirs);
+}
+
+void Board::undo_move(Move m, std::vector<std::pair<int8_t, int8_t>> dirs) {
+    undo_move(m/8, m%8, dirs);
 }
 
 void Board::set_piece(int i, int j, Color c) {
@@ -228,40 +235,3 @@ Color Board::win() const {
     if (score() < 0) return WHITE;
     else return BLACK;
 }
-
-/* Return a random `best move` chosen by Alpha Beta pruning.
- *
- * Input:
- *  - depth, the depth of the search
- *
- *  Output:
- *  - pair (i, j) of the best_move
- */
-/*
-std::pair<int, int> Board::best_move(int depth) const {
-    Board exploration;
-    std::pair<int, int> best;
-    Color best_score = 0;
-    float s;
-
-    std::vector<std::pair<int, int>> ch = childs();
-    best = ch[rand()%ch.size()]; // Default is random move
-
-
-    for (auto x : ch) {
-        exploration = *this;
-        exploration.move(x);
-        s = alpha_beta(exploration, depth, -1, 1);
-        if ((sideToMove == BLACK  and s > best_score) or
-            (sideToMove == WHITE and s < best_score)) {
-                best_score = s;
-                best = x;
-        }
-    }
-    return best;
-}
-
-std::pair<int, int> Board::best_move() const {
-    return best_move(5);
-}
-*/
