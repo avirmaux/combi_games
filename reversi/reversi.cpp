@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "reversi.hpp"
+#include "misc.hpp"
 // #include "search.hpp"
 
 Board::Board() : sideToMove(BLACK), nbr_pieces(0) {
@@ -46,8 +47,9 @@ void Board::display() const {
  *  la présence d'un jeton de la même couleur que le jeton en i, j dans la
  *  direction donnée
  */
-bool Board::is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v, Color player) const {
+bool Board::is_legal_direction(int8_t i, int8_t j, Direction dir, Color player) const {
     Color us = player;
+    std::pair<int8_t, int8_t> v = to_pair(dir); 
     Color them = (player == BLACK) ? WHITE : BLACK;
     int cpt = -1; // At least one adversary token in between
     do {
@@ -62,8 +64,34 @@ bool Board::is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v, Color 
               cpt > 0 and
               piece(i, j) == us);
 }
-bool Board::is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v) const {
-    return is_legal_direction(i, j, v, side_to_move());
+
+bool Board::is_legal_direction(int8_t i, int8_t j, Direction dir)  const {
+    return is_legal_direction(i, j, dir, side_to_move());
+}
+
+/* Return the vector of directions in which tokens will be flipped over
+ */
+int8_t Board::legal_directions(int8_t i, int8_t j) const {
+    int8_t res = 0;
+    if (piece(i, j) != EMPTY) return res;
+    for (int8_t d = N; d < DIRECTION_NB; d++) {
+        if (is_legal_direction(i, j, static_cast<Direction>(d))) {
+            set_bit(res, d);
+        }
+    }
+    return res;
+}
+
+int8_t Board::legal_directions(int8_t i) const {
+    return legal_directions(i/8, i%8);
+}
+
+Move Board::make_move(int8_t i) const {
+    return {i, legal_directions(i)};
+}
+
+Move Board::make_move(int8_t i, int8_t j) const {
+    return make_move(8*i + j);
 }
 
 /* Applique un retournement le long de l'axe v si légal
@@ -72,11 +100,12 @@ bool Board::is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v) const 
  *  - i, j: position du coup
  *  - v: pair d'éléments de {-1, 0, 1} représentation une direction
  */
-void Board::flip_direction(int i, int j, std::pair<int8_t, int8_t> v) {
+void Board::flip_direction(int8_t i, int8_t j, Direction dir) {
     Color us = side_to_move();
+    std::pair<int8_t, int8_t> v = to_pair(dir);
     Color them = (side_to_move() == BLACK) ? WHITE : BLACK;
 
-    if (!is_legal_direction(i, j, v)) return;
+    if (!is_legal_direction(i, j, dir)) return;
 
     do {
         set_piece(i, j, us);; // First one is the actual play
@@ -85,58 +114,20 @@ void Board::flip_direction(int i, int j, std::pair<int8_t, int8_t> v) {
     } while (piece(i, j) == them);
 }
 
-/* Return the vector of directions in which tokens will be flipped over
- */
-std::vector<std::pair<int8_t, int8_t>> Board::legal_directions(int i, int j) const {
-    std::vector<std::pair<int8_t, int8_t>> res;
-    if (piece(i, j) != EMPTY) return res;
-    for (int d = N; d < DIRECTION_NB; d++) {
-        if (is_legal_direction(i, j, to_pair(static_cast<Direction>(d)))) {
-            res.push_back(to_pair(static_cast<Direction>(d)));
-        }
-    }
-    return res;
-}
-
 // Return true if a move is legal
 
 // Index 2D with color
-bool Board::is_legal_move(int i, int j, Color player) const {
-    if (piece(i, j) != EMPTY) return false;
-    for (int d = N; d < DIRECTION_NB; d++)
-        if (is_legal_direction(i, j, to_pair(static_cast<Direction>(d)), player))
-            return true;
-    return false;
-}
-
-// Index 2D
-bool Board::is_legal_move(int i, int j) const {
-    if (piece(i, j) != EMPTY) return false;
-    for (int d = N; d < DIRECTION_NB; d++)
-        if (is_legal_direction(i, j, to_pair(static_cast<Direction>(d))))
-            return true;
-    return false;
-}
-
-// Indexed by Move i \in 0 .. 63
-bool Board::is_legal_move(Move i, Color player) const {
-    if (piece(i) != EMPTY) return false;
-    for (int d = N; d < DIRECTION_NB; d++)
-        if (is_legal_direction(i/8, i%8, to_pair(static_cast<Direction>(d)), player))
-            return true;
-    return false;
-}
-
-bool Board::is_legal_move(Move i) const {
-    return is_legal_move(i, side_to_move());
+//
+bool Board::is_legal_move(int8_t i) const {
+    return (make_move(i).from != 0);
 }
 
 // Return all legal moves in a vector of Move
 std::vector<Move> Board::legal_moves(Color player) const{
     std::vector<Move> res;
     for (int i = 0; i < 8*8; i++)
-            if (is_legal_move((Move) i, player))
-                res.push_back(i);
+            if (is_legal_move(i))
+                res.push_back(make_move(i));
     return res;
 }
 
@@ -146,38 +137,40 @@ std::vector<Move> Board::legal_moves() const{
 
 // Mouvements
 
-std::vector<std::pair<int8_t, int8_t>> Board::make_move(int i, int j) {
-    std::vector<std::pair<int8_t, int8_t>> dir = legal_directions(i, j);
-    if (dir.empty()) {
+void Board::do_move(int8_t i, int8_t j) {
+    int8_t dir = legal_directions(i, j); // Bitset of legal directions
+    if (dir == 0) {
         std::cerr << i << " " << j << " is not a legal move" << std::endl;
-        return {}; // Not a legal move
+        return; // Not a legal move
     }
 
-    for (auto v : dir) {
-        flip_direction(i, j, v);
+    for (int8_t d = 0; d < 8; d++) {
+        if (is_set(dir, d)) // if d-th bit is set to 1
+            flip_direction(i, j, (Direction) d);
     }
 
     if (!legal_moves().empty())
         sideToMove = (sideToMove == WHITE)? BLACK : WHITE;
     nbr_pieces++;
-    return dir;
 }
 
-std::vector<std::pair<int8_t, int8_t>> Board::make_move(std::pair<int, int> p) {
-    return make_move(p.first, p.second);
+void Board::do_move(Move m) {
+    make_move(m.to/8, m.to%8);
 }
 
-std::vector<std::pair<int8_t, int8_t>> Board::make_move(Move m) {
-    return make_move(m/8, m%8);
-}
-
-void Board::undo_move(int i, int j, std::vector<std::pair<int8_t, int8_t>> dirs) {
-    Color us = piece(i, j);
+// void Board::undo_move(int8_t i, int8_t j, int8_t dirs) {
+void Board::undo_move(Move m) {
+    Color us = piece(m.to);
     Color them = (us == BLACK)? WHITE : BLACK;
+    std::pair<int8_t, int8_t> d;
+    int i = m.to/8, j = m.to%8;
     int k, l;
 
     set_piece(i, j, EMPTY);
-    for (auto &d : dirs) {
+    for (int8_t dir = 0; dir < 8; dir++) {
+        if (!is_set(m.from, dir)) continue;
+        d = to_pair(static_cast<Direction>(dir));
+
         k = i + d.first;
         l = j + d.second;
         while (k >= 0 and k < 8 and
@@ -189,14 +182,6 @@ void Board::undo_move(int i, int j, std::vector<std::pair<int8_t, int8_t>> dirs)
         }
         set_piece(k - d.first, l - d.second, us);
     }
-}
-
-void Board::undo_move(std::pair<int, int> v, std::vector<std::pair<int8_t, int8_t>> dirs) {
-    undo_move(v.first, v.second, dirs);
-}
-
-void Board::undo_move(Move m, std::vector<std::pair<int8_t, int8_t>> dirs) {
-    undo_move(m/8, m%8, dirs);
 }
 
 void Board::set_piece(int i, int j, Color c) {

@@ -113,7 +113,7 @@ Move pick_move(Board pos, int depth) {
 
     for (auto &m : childs) {
         exploration = pos;
-        exploration.make_move(m);
+        exploration.do_move(m);
         value = search(exploration, depth, alpha, beta);
         if (value > bestValue) {
             bestValue = value;
@@ -137,9 +137,9 @@ Value search(Board &pos, int depth, Value alpha, Value beta) {
 
     for (auto &m : pos.legal_moves()) {
         // Make fun
-        dirs = pos.make_move(m);
+        pos.do_move(m);
         value = -search(pos, depth-1, -beta, -alpha);
-        pos.undo_move(m, dirs);
+        pos.undo_move(m);
         bestValue = std::max(bestValue, value);
         alpha = std::max(alpha, value);
         if (alpha >= beta)

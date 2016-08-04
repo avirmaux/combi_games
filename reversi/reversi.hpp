@@ -17,8 +17,8 @@ class Board {
     void display() const;
 
     // State of the board
-    Color piece(int) const;
-    Color piece(int, int) const;
+    Color piece(int8_t) const;
+    Color piece(int8_t, int8_t) const;
 
     Color side_to_move() const;
 
@@ -27,25 +27,23 @@ class Board {
     void set_piece(std::pair<int, int>, Color);
 
     // Mouvements
-    std::vector<std::pair<int8_t, int8_t>> make_move(Move m);
-    std::vector<std::pair<int8_t, int8_t>> make_move(int, int);
-    std::vector<std::pair<int8_t, int8_t>> make_move(std::pair<int, int>);
 
-    void undo_move(Move m, std::vector<std::pair<int8_t, int8_t>>);
-    void undo_move(int, int, std::vector<std::pair<int8_t, int8_t>>);
-    void undo_move(std::pair<int, int>, std::vector<std::pair<int8_t, int8_t>>);
+    // Return a Move struct out of coordinates, const
+    Move make_move(int8_t) const;
+    Move make_move(int8_t, int8_t) const;
 
+    // Do the move, non const
+    void do_move(Move m);
+    void do_move(int8_t, int8_t);
+
+    // Undo the move, non const
+    void undo_move(Move m);
 
     // List of mouvements
     std::vector<Move> legal_moves() const;
     std::vector<Move> legal_moves(Color player) const;
 
-    // 2D
-    bool is_legal_move(int, int) const;
-    bool is_legal_move(int i, int j, Color player) const;
-    // 1D
-    bool is_legal_move(Move i, Color player) const;
-    bool is_legal_move(Move i) const;
+    bool is_legal_move(int8_t) const;
 
     // Win
     bool end_game() const;
@@ -64,19 +62,21 @@ class Board {
     Color sideToMove;
     int8_t nbr_pieces;
 
-    // Mouvement
+    // Mouvements
 
-    bool is_legal_direction(int i, int j, std::pair<int8_t, int8_t> v, Color player) const;
-    bool is_legal_direction(int, int, std::pair<int8_t, int8_t>) const;
-    std::vector<std::pair<int8_t, int8_t>> legal_directions(int, int) const;
-    void flip_direction(int, int, std::pair<int8_t, int8_t>);
+    bool is_legal_direction(int8_t, int8_t, Direction, Color) const;
+    bool is_legal_direction(int8_t, int8_t, Direction) const;
+    int8_t legal_directions(int8_t) const;
+    int8_t legal_directions(int8_t, int8_t) const;
+
+    void flip_direction(int8_t, int8_t, Direction);
 };
 
-inline Color Board::piece(int i) const {
+inline Color Board::piece(int8_t i) const {
     return board[i];
 }
 
-inline Color Board::piece(int i, int j) const {
+inline Color Board::piece(int8_t i, int8_t j) const {
     return board[8*i + j];
 }
 

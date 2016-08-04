@@ -44,9 +44,9 @@ int cpu_vs_cpu() {
         rev.display();
         std::cout << std::endl;
         if (rev.side_to_move() == BLACK) {
-            rev.make_move(Search::pick_move(rev, 9));
+            rev.do_move(Search::pick_move(rev, 9));
         } else {
-            rev.make_move(Search::pick_move(rev, 5));
+            rev.do_move(Search::pick_move(rev, 5));
         }
     }
     rev.display();

@@ -1,7 +1,7 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
-#include <bistset>
+// #include <bistset>
 #include <cstdint>
 
 enum Direction : uint8_t {N, NE, E, SE, S, SW, W, NW, DIRECTION_NB = 8};
@@ -12,11 +12,9 @@ enum Color {BLACK, WHITE, EMPTY, COLOR_NB = 3};
 // to: index in the board array of the new token
 // from: bitset with the directions of flips
 struct Move {
-    uint8_t to;
-    std::bitset<8> from;
-}
-
-typedef uint8_t Move;
+    int8_t to;
+    int8_t from;
+};
 
 enum Value : int {
     SCORE_ZERO     = 0,
@@ -47,7 +45,7 @@ inline int operator/(T d1, T d2) { return int(d1) / int(d2); }  \
 inline T& operator/=(T& d, int i) { return d = T(int(d) / i); }
 
 ENABLE_FULL_OPERATORS_ON(Value)
-ENABLE_FULL_OPERATORS_ON(Direction)
+// ENABLE_FULL_OPERATORS_ON(Direction)
 
 inline Value operator+(Value v, int i) { return Value(int(v) + i); }
 inline Value operator-(Value v, int i) { return Value(int(v) - i); }
