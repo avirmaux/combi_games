@@ -101,7 +101,7 @@ std::pair<int, int> best_move(Board const& pos) {
 */
 
 Move pick_move(Board pos, int depth) {
-    std::vector<Move> childs = pos.legal_moves();
+    std::vector<Move> childs = pos.legal_moves(pos.side_to_move());
     assert(!childs.empty());
     Board exploration;
     Value value, bestValue, alpha, beta;
@@ -135,7 +135,7 @@ Value search(Board &pos, int depth, Value alpha, Value beta) {
     if (depth < 0 or pos.end_game())
         return ((pos.side_to_move() == BLACK) ? 1 : -1) * Eval::evaluate_position(pos);
 
-    for (auto &m : pos.legal_moves()) {
+    for (auto &m : pos.legal_moves(pos.side_to_move())) {
         // Make fun
         pos.do_move(m);
         value = -search(pos, depth-1, -beta, -alpha);

@@ -5,21 +5,23 @@
 #include "search.hpp"
 #include "evaluate.hpp"
 #include "types.hpp"
+#include "misc.hpp"
 
-/*
 int human_vs_human() {
     Board rev;
     int i, j;
     while(!rev.end_game()) {
         rev.display();
-        std::cout << std::endl;
+        std::cout << "&" << std::endl;
+        std::cout << "#Moves = " << rev.legal_moves().size() << std::endl;
         std::cin >> i >> j;
-        rev.make_move(i, j);
+        rev.do_move(rev.make_move(i, j));
     }
     rev.display();
     return Eval::evaluate_position(rev);
 }
 
+/*
 int cpu_vs_human() {
     Board rev;
     int i, j;
@@ -36,7 +38,6 @@ int cpu_vs_human() {
     rev.display();
     return Eval::evaluate_position(rev);
 }
-*/
 
 int cpu_vs_cpu() {
     Board rev;
@@ -53,14 +54,15 @@ int cpu_vs_cpu() {
     std::cout << std::endl;
     return rev.score();
 }
+*/
 
 int main() {
     srand(time(NULL));
     Board rev;
     // rev.display();
     // human_vs_human();
-    // cpu_vs_human();
-    std::cout << cpu_vs_cpu() << std::endl;
+    std::cout << human_vs_human() << std::endl;
+    // std::cout << cpu_vs_cpu() << std::endl;
 
     // Average win
     // int avg = 0;

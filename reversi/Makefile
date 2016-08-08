@@ -14,4 +14,4 @@ all: $(OBJS)
 
 .PHONY:
 clean:
-	rm *.o
+	@rm $(OBJS)
