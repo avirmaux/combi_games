@@ -49,7 +49,7 @@ inline int operator/(T d1, T d2) { return int(d1) / int(d2); }  \
 inline T& operator/=(T& d, int i) { return d = T(int(d) / i); }
 
 ENABLE_FULL_OPERATORS_ON(Value)
-ENABLE_FULL_OPERATORS_ON(Direction)
+// ENABLE_FULL_OPERATORS_ON(Direction)
 
 inline Value operator+(Value v, int i) { return Value(int(v) + i); }
 inline Value operator-(Value v, int i) { return Value(int(v) - i); }

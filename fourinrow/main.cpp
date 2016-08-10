@@ -21,14 +21,14 @@ int CPU_move_mc(FourInRow game) {
 void human_vs_CPU() {
     int i;
     FourInRow game;
-    game.player = 1;
+    game.player = -1;
     while (game.nmoves < 42 and game.win() == 0) {
         if (game.player == 1) {
             std::cin >> i;
             game.move(i);
         }
         else {
-            game.move(CPU_move_mc(game, 10000));
+            game.move(CPU_move_mc(game, 12000));
             // game.move(CPU_move_ab(game));
         }
         game.display();

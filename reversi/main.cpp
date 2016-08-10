@@ -61,7 +61,9 @@ int main() {
     Board rev;
     // rev.display();
     // human_vs_human();
+    rev.display();
     std::cout << human_vs_human() << std::endl;
+
     // std::cout << cpu_vs_cpu() << std::endl;
 
     // Average win

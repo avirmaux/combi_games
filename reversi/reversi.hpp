@@ -56,7 +56,6 @@ class Board {
     int8_t nbr_pieces;
 
     // Mouvements
-
     bool is_legal_direction(int8_t, int8_t, Direction, Color) const;
     bool is_legal_direction(int8_t, int8_t, Direction) const;
     int8_t legal_directions(int8_t, Color) const;

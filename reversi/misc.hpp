@@ -1,6 +1,7 @@
 #ifndef _MISC_H
 #define _MISC_H
 
+// Given a Direction, returns a pair \in {-1, 0, 1}
 std::pair<int8_t, int8_t> to_pair(Direction);
 
 // Set ith bit to 1
